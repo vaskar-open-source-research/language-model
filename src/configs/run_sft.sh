@@ -1,0 +1,2 @@
+python /mnt/efs/vaskarnath/practice/spring2024-assignment1-basics/cs336_basics/trainer.py \
+    --config /mnt/efs/vaskarnath/practice/spring2024-assignment1-basics/cs336_basics/configs/sft_train_owt.json
