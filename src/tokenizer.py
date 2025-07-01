@@ -5,6 +5,8 @@ import copy
 from tqdm import tqdm
 from heapq import heappush, heappop
 import torch
+from argparse import ArgumentParser
+import os
 
 class Tokenizer:
 
@@ -110,24 +112,20 @@ class Tokenizer:
         else:
             pre_tokens = corpus_to_pre_tokens(text)
 
-        pre_token_bytes = []
+        pre_token_bytes = set()
         for pre_token in tqdm(pre_tokens, total=len(pre_tokens), desc="Text to bytes", disable=not show_progress):
             pre_token_byte = pre_token.encode('utf-8')
             if pre_token_byte in self.rvocab:
-                pre_token_bytes.append(pre_token_byte)
+                pre_token_bytes.add((pre_token, pre_token_byte))
             else:
-                pre_token_bytes.append(tuple([bytes([c]) for c in pre_token_byte]))
+                pre_token_bytes.add((pre_token, tuple([bytes([c]) for c in pre_token_byte])))
 
-        token_ids = []
-        mp = {}
-        for pre_token, pre_token_byte in tqdm(zip(pre_tokens, pre_token_bytes), total=len(pre_tokens), desc="Encoding text", disable=not show_progress):
+
+        pre_token_to_ids_mp = {}
+        for pre_token, pre_token_byte in tqdm(pre_token_bytes, total=len(pre_token_bytes), desc="Encoding text", disable=not show_progress):
             pre_token_full_byte = pre_token.encode('utf-8')
             if pre_token_full_byte in self.rvocab:
-                token_ids.append(self.rvocab[pre_token_full_byte])
-                continue
-
-            if pre_token_byte in mp:
-                token_ids.extend(mp[pre_token_byte])
+                pre_token_to_ids_mp[pre_token] = [self.rvocab[pre_token_full_byte]]
                 continue
             
             curr_pre_token_byte = copy.deepcopy(pre_token_byte)
@@ -147,6 +145,8 @@ class Tokenizer:
                             new_pre_token_byte.append(curr_pre_token_byte[i])
                             i += 1
                     curr_pre_token_byte = new_pre_token_byte
+                    if len(curr_pre_token_byte) <= 2:
+                        break
             else:
                 new_pre_token_byte = curr_pre_token_byte
                     
@@ -154,9 +154,11 @@ class Tokenizer:
             curr_token_ids = []
             for token_byte in new_pre_token_byte:
                 curr_token_ids.append(self.rvocab[token_byte])
-            token_ids.extend(curr_token_ids)
+            pre_token_to_ids_mp[pre_token] = curr_token_ids
 
-            mp[pre_token_byte] = curr_token_ids
+        token_ids = []
+        for pre_token in pre_tokens:
+            token_ids.extend(pre_token_to_ids_mp[pre_token])
 
         if return_tensors:
             return torch.tensor(token_ids)
@@ -179,3 +181,18 @@ class Tokenizer:
             else:
                 all_bytes += self.vocab[id]
         return all_bytes.decode('utf-8', errors='replace')
+
+
+if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument("--tokenizer_path", type=str)
+    parser.add_argument("--input_path", type=str)
+    parser.add_argument("--output_path", type=str)
+    parser.add_argument("--show_progress", action="store_true")
+    args = parser.parse_args()
+
+    tokenizer = Tokenizer.from_files(os.path.join(args.tokenizer_path, 'vocab.json'), os.path.join(args.tokenizer_path, 'merges.txt'))
+    with open(args.input_path, 'r') as fp:
+        corpus = fp.read()
+        token_ids = tokenizer.encode(corpus, return_tensors=True, show_progress=args.show_progress)
+        torch.save(token_ids, args.output_path)
