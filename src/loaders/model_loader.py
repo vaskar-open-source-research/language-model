@@ -18,8 +18,8 @@ def load_checkpoint(model, optimizer, out):
     return iteration
 
 if __name__ == "__main__":
-    from cs336_basics.language_model.transformer_lm import TransformerLM
-    from cs336_basics.train.adamw import AdamW
+    from src.language_model.transformer_lm import TransformerLM
+    from src.train.adamw import AdamW
     ckpt_path = "/mnt/efs/vaskarnath/practice/spring2024-assignment1-basics/ckpt/checkpoint_8.pt"
     model = TransformerLM(vocab_size=10000, context_length=1024, d_model=128, num_layers=1, num_heads=2, d_ff=128, attn_pdrop=0.1, residual_pdrop=0.1, device='cuda')
     optimizer = AdamW(model.parameters(), weight_decay=0.01, lr=0.0001)

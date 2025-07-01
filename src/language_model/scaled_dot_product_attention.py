@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 import math
-from cs336_basics.language_model.softmax import softmax
+from src.language_model.softmax import softmax
 
 def scaled_dot_product_attention(q, k, v, mask=None, pdrop=None):
 

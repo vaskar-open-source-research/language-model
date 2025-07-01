@@ -1,5 +1,5 @@
 import torch.nn as nn
-from cs336_basics.language_model.gelu import gelu
+from src.language_model.gelu import gelu
 
 class FFN(nn.Module):
 

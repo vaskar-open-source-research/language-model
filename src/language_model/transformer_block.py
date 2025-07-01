@@ -1,8 +1,8 @@
 import torch.nn as nn
 import torch.nn.functional as F
-from cs336_basics.language_model.multihead_self_attention import MultiHeadSelfAttention
-from cs336_basics.language_model.ffn import FFN
-from cs336_basics.language_model.rmsnorm import RMSNorm
+from src.language_model.multihead_self_attention import MultiHeadSelfAttention
+from src.language_model.ffn import FFN
+from src.language_model.rmsnorm import RMSNorm
 
 
 class TransformerBlock(nn.Module):

@@ -2,9 +2,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from collections import OrderedDict
-from cs336_basics.language_model.transformer_block import TransformerBlock
-from cs336_basics.language_model.rmsnorm import RMSNorm
-from cs336_basics.language_model.softmax import softmax
+from src.language_model.transformer_block import TransformerBlock
+from src.language_model.rmsnorm import RMSNorm
+from src.language_model.softmax import softmax
 
 class KVCache:
 
@@ -110,7 +110,7 @@ class TransformerLM(nn.Module):
         print(f"Device: {self.device}")
 
 if __name__ == "__main__":
-    from cs336_basics.tokenizer import Tokenizer
+    from src.tokenizer import Tokenizer
     import time
     model = TransformerLM(vocab_size=10001, context_length=256, d_model=512, num_layers=4, num_heads=16, d_ff=2048, attn_pdrop=0.0, residual_pdrop=0.0, device='cuda')
     ckpt_path = "/mnt/efs/vaskarnath/practice/spring2024-assignment1-basics/ckpt/checkpoint_157000.pt"

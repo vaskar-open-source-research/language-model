@@ -1,18 +1,18 @@
 from abc import ABC, abstractmethod
 import torch
 import os
-from cs336_basics.loaders.model_loader import save_checkpoint
-from cs336_basics.train.adamw import AdamW
-from cs336_basics.train.cross_entropy import cross_entropy
+from src.loaders.model_loader import save_checkpoint
+from src.train.adamw import AdamW
+from src.train.cross_entropy import cross_entropy
 from argparse import ArgumentParser
-from cs336_basics.loaders.data_loader import data_loader
+from src.loaders.data_loader import data_loader
 import json
-from cs336_basics.language_model.transformer_lm import TransformerLM
-from cs336_basics.tokenizer import Tokenizer
-from cs336_basics.language_model.softmax import softmax
-from cs336_basics.train.gradient_clipping import gradient_clipping
-from cs336_basics.train.learning_rate_schedule import learning_rate_schedule, WarmupCosine
-from cs336_basics.train.contrastive_loss import contrastive_loss
+from src.language_model.transformer_lm import TransformerLM
+from src.tokenizer import Tokenizer
+from src.language_model.softmax import softmax
+from src.train.gradient_clipping import gradient_clipping
+from src.train.learning_rate_schedule import learning_rate_schedule, WarmupCosine
+from src.train.contrastive_loss import contrastive_loss
 
 class Trainer(ABC):
 

@@ -13,6 +13,10 @@ import numpy as np
 #     return input_ids, labels
 
 def data_loader(dataset, batch_size: int, context_length: int, device: str = 'cuda'): 
+    if isinstance(dataset, torch.Tensor):
+        dataset = dataset.to(device)
+    else:
+        dataset = torch.tensor(dataset).to(device)
     range = len(dataset) - context_length
     rng = np.random.default_rng()          # fastest generator in NumPy ≥1.17
     sampled = rng.choice(range, batch_size, replace=False)

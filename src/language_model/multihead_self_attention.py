@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
-from cs336_basics.language_model.scaled_dot_product_attention import scaled_dot_product_attention
-from cs336_basics.language_model.rmsnorm import RMSNorm
+from src.language_model.scaled_dot_product_attention import scaled_dot_product_attention
+from src.language_model.rmsnorm import RMSNorm
 
 
 class MultiHeadSelfAttention(nn.Module):

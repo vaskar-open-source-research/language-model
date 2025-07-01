@@ -1,6 +1,6 @@
 from typing import Iterable, List, Dict, Tuple, Iterator
 import json
-from cs336_basics.utils import corpus_to_pre_tokens
+from src.utils import corpus_to_pre_tokens
 import copy
 from tqdm import tqdm
 from heapq import heappush, heappop
@@ -25,28 +25,28 @@ class Tokenizer:
                 if special_token_bytes not in self.vocab.values():
                     self.vocab[len(self.vocab)] = special_token_bytes
 
-        self.pad_token = pad_token
-        self.eos_token = eos_token
+        # self.pad_token = pad_token
+        # self.eos_token = eos_token
         
-        pad_token_bytes = pad_token.encode('utf-8')
-        if pad_token_bytes not in self.vocab.values():
-            key = len(self.vocab)
-            self.vocab[key] = pad_token_bytes
-            self.rvocab[pad_token_bytes] = key
+        # pad_token_bytes = pad_token.encode('utf-8')
+        # if pad_token_bytes not in self.vocab.values():
+        #     key = len(self.vocab)
+        #     self.vocab[key] = pad_token_bytes
+        #     self.rvocab[pad_token_bytes] = key
         
-        eos_token_bytes = eos_token.encode('utf-8')
-        if eos_token_bytes not in self.vocab.values():
-            key = len(self.vocab)
-            self.vocab[key] = eos_token_bytes
-            self.rvocab[eos_token_bytes] = key
+        # eos_token_bytes = eos_token.encode('utf-8')
+        # if eos_token_bytes not in self.vocab.values():
+        #     key = len(self.vocab)
+        #     self.vocab[key] = eos_token_bytes
+        #     self.rvocab[eos_token_bytes] = key
         
-        self.pad_token_id = self.rvocab[pad_token_bytes]
-        self.eos_token_id = self.rvocab[eos_token_bytes]
+        # self.pad_token_id = self.rvocab[pad_token_bytes]
+        # self.eos_token_id = self.rvocab[eos_token_bytes]
 
-        if self.pad_token not in self.special_tokens:
-            self.special_tokens.append(self.pad_token)
-        if self.eos_token not in self.special_tokens:
-            self.special_tokens.append(self.eos_token)
+        # if self.pad_token not in self.special_tokens:
+        #     self.special_tokens.append(self.pad_token)
+        # if self.eos_token not in self.special_tokens:
+        #     self.special_tokens.append(self.eos_token)
 
     @classmethod
     def from_files(cls, vocab_filepath: str, merges_filepath: str, special_tokens: list[str] | None = None):
@@ -66,7 +66,7 @@ class Tokenizer:
         
         return cls(vocab_dict, merges, special_tokens)
         
-    def encode(self, text: str) -> List[int]:
+    def encode(self, text: str, return_tensors: bool = False, show_progress: bool = False) -> List[int]:
         if self.special_tokens:
             
             min_heap = []
@@ -101,7 +101,7 @@ class Tokenizer:
                 special_token_mask.append(0)
             
             pre_tokens = []
-            for i in tqdm(range(len(split_strings)), total=len(split_strings), desc="Splitting text with special tokens"):
+            for i in tqdm(range(len(split_strings)), total=len(split_strings), desc="Splitting text with special tokens", disable=not show_progress):
                 s, mask = split_strings[i], special_token_mask[i]
                 if mask:
                     pre_tokens.append(s)
@@ -111,7 +111,7 @@ class Tokenizer:
             pre_tokens = corpus_to_pre_tokens(text)
 
         pre_token_bytes = []
-        for pre_token in tqdm(pre_tokens, total=len(pre_tokens), desc="Text to bytes"):
+        for pre_token in tqdm(pre_tokens, total=len(pre_tokens), desc="Text to bytes", disable=not show_progress):
             pre_token_byte = pre_token.encode('utf-8')
             if pre_token_byte in self.rvocab:
                 pre_token_bytes.append(pre_token_byte)
@@ -120,7 +120,7 @@ class Tokenizer:
 
         token_ids = []
         mp = {}
-        for pre_token, pre_token_byte in tqdm(zip(pre_tokens, pre_token_bytes), total=len(pre_tokens), desc="Encoding text"):
+        for pre_token, pre_token_byte in tqdm(zip(pre_tokens, pre_token_bytes), total=len(pre_tokens), desc="Encoding text", disable=not show_progress):
             pre_token_full_byte = pre_token.encode('utf-8')
             if pre_token_full_byte in self.rvocab:
                 token_ids.append(self.rvocab[pre_token_full_byte])
@@ -158,7 +158,10 @@ class Tokenizer:
 
             mp[pre_token_byte] = curr_token_ids
 
-        return torch.tensor(token_ids)
+        if return_tensors:
+            return torch.tensor(token_ids)
+        else:   
+            return token_ids
 
     def encode_iterable(self, iterable: Iterable[str]) -> Iterator[int]:
         token_ids = []

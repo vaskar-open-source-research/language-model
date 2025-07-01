@@ -6,22 +6,22 @@ from typing import IO, BinaryIO, Iterable, Optional, Type
 
 import numpy.typing as npt
 import torch
-from cs336_basics.train_bpe import optmized_train_bpe
-from cs336_basics.tokenizer import Tokenizer
-from cs336_basics.language_model.rmsnorm import RMSNorm
-from cs336_basics.language_model.gelu import gelu
-from cs336_basics.language_model.ffn import FFN
-from cs336_basics.language_model.softmax import softmax
-from cs336_basics.language_model.scaled_dot_product_attention import scaled_dot_product_attention
-from cs336_basics.language_model.multihead_self_attention import MultiHeadSelfAttention
-from cs336_basics.language_model.transformer_block import TransformerBlock
-from cs336_basics.language_model.transformer_lm import TransformerLM
-from cs336_basics.train.cross_entropy import cross_entropy
-from cs336_basics.train.adamw import AdamW
-from cs336_basics.train.learning_rate_schedule import learning_rate_schedule
-from cs336_basics.train.gradient_clipping import gradient_clipping
-from cs336_basics.loaders.data_loader import data_loader
-from cs336_basics.loaders.model_loader import load_checkpoint, save_checkpoint
+from src.train_bpe import optmized_train_bpe
+from src.tokenizer import Tokenizer
+from src.language_model.rmsnorm import RMSNorm
+from src.language_model.gelu import gelu
+from src.language_model.ffn import FFN
+from src.language_model.softmax import softmax
+from src.language_model.scaled_dot_product_attention import scaled_dot_product_attention
+from src.language_model.multihead_self_attention import MultiHeadSelfAttention
+from src.language_model.transformer_block import TransformerBlock
+from src.language_model.transformer_lm import TransformerLM
+from src.train.cross_entropy import cross_entropy
+from src.train.adamw import AdamW
+from src.train.learning_rate_schedule import learning_rate_schedule
+from src.train.gradient_clipping import gradient_clipping
+from src.loaders.data_loader import data_loader
+from src.loaders.model_loader import load_checkpoint, save_checkpoint
 
 
 
