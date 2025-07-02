@@ -68,7 +68,7 @@ class Tokenizer:
         
         return cls(vocab_dict, merges, special_tokens)
         
-    def encode(self, text: str, return_tensors: bool = False, show_progress: bool = False) -> List[int]:
+    def encode(self, text: str, return_tensors: bool = False, show_progress: bool = False) -> List[int] | torch.Tensor:
         if self.special_tokens:
             
             min_heap = []
@@ -120,6 +120,9 @@ class Tokenizer:
             else:
                 pre_token_bytes.add((pre_token, tuple([bytes([c]) for c in pre_token_byte])))
 
+        merges_to_position = {}
+        for i, merge in enumerate(self.merges):
+            merges_to_position[merge] = i
 
         pre_token_to_ids_mp = {}
         for pre_token, pre_token_byte in tqdm(pre_token_bytes, total=len(pre_token_bytes), desc="Encoding text", disable=not show_progress):
@@ -128,31 +131,23 @@ class Tokenizer:
                 pre_token_to_ids_mp[pre_token] = [self.rvocab[pre_token_full_byte]]
                 continue
             
-            curr_pre_token_byte = copy.deepcopy(pre_token_byte)
+            curr_pre_token_byte = list(pre_token_byte)
 
-            if len(self.merges) > 0:
-                for merge in self.merges:
-                    i = 0
-                    new_pre_token_byte = []
-                    while i < len(curr_pre_token_byte):
-                        if i == len(curr_pre_token_byte) - 1:
-                            new_pre_token_byte.append(curr_pre_token_byte[i])
-                            i += 1
-                        elif (curr_pre_token_byte[i], curr_pre_token_byte[i + 1]) == merge:
-                            new_pre_token_byte.append(curr_pre_token_byte[i] + curr_pre_token_byte[i + 1])
-                            i += 2
-                        else:
-                            new_pre_token_byte.append(curr_pre_token_byte[i])
-                            i += 1
-                    curr_pre_token_byte = new_pre_token_byte
-                    if len(curr_pre_token_byte) <= 2:
-                        break
-            else:
-                new_pre_token_byte = curr_pre_token_byte
-                    
-                
+            while len(curr_pre_token_byte) > 2:
+                minimum_merge_position = float('inf')
+                minimum_merge_index = None
+                for i in range(len(curr_pre_token_byte) - 1):
+                    if (curr_pre_token_byte[i], curr_pre_token_byte[i + 1]) in self.merges:
+                        if merges_to_position[(curr_pre_token_byte[i], curr_pre_token_byte[i + 1])] < minimum_merge_position:
+                            minimum_merge_position = merges_to_position[(curr_pre_token_byte[i], curr_pre_token_byte[i + 1])]
+                            minimum_merge_index = i
+                if minimum_merge_index is not None:
+                    curr_pre_token_byte = curr_pre_token_byte[:minimum_merge_index] + [curr_pre_token_byte[minimum_merge_index] + curr_pre_token_byte[minimum_merge_index + 1]] + curr_pre_token_byte[minimum_merge_index + 2:]
+                else:
+                    break
+            
             curr_token_ids = []
-            for token_byte in new_pre_token_byte:
+            for token_byte in curr_pre_token_byte:
                 curr_token_ids.append(self.rvocab[token_byte])
             pre_token_to_ids_mp[pre_token] = curr_token_ids
 
@@ -165,10 +160,10 @@ class Tokenizer:
         else:   
             return token_ids
 
-    def encode_iterable(self, iterable: Iterable[str]) -> Iterator[int]:
+    def encode_iterable(self, iterable: Iterable[str], return_tensors: bool = False, show_progress: bool = False) -> List[int] | torch.Tensor:
         token_ids = []
         for text in iterable:
-            token_ids.extend(self.encode(text))
+            token_ids.extend(self.encode(text, return_tensors=return_tensors, show_progress=show_progress))
         return token_ids
 
     def decode(self, ids: list[int]) -> str:
